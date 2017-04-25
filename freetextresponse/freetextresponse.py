@@ -280,10 +280,10 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
             )
             field_info = self._make_field_info(field_name, field)
             if field_info is not None:
-                if (field_name == 'block_id') {
+                if field_name == 'block_id':
                     print 'i am in the if'
                     field_info['value'] = xblockId
-                }
+                
                 context["fields"].append(field_info)
         frag.content = loader.render_django_template("static/studio_edit.html", context)
         frag.add_javascript(loader.load_unicode("static/studio_edit.js"))
