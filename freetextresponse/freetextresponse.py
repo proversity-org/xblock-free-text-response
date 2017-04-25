@@ -248,8 +248,13 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
         """
         Render a form for editing this XBlock
         """
+        idArray = self.scope_ids.usage_id._to_string().split('@')
+        xblockId = idArray[len(idArray) -1]
         frag = Fragment()
-        context = {'block_id': self.scope_ids.usage_id._to_string()}
+        context = {
+            'fields': [],
+            'block_id': xblockId
+        }
         # Build a list of all the fields that can be edited:
         for field_name in self.editable_fields:
             field = self.fields[field_name]
