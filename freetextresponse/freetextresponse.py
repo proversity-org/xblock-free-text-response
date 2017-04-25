@@ -18,7 +18,16 @@ from xblock.fields import String
 from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import StudioEditableXBlockMixin
+<<<<<<< HEAD
 from .mixins import EnforceDueDates
+=======
+from xblockutils.resources import ResourceLoader
+
+from .utils import _
+>>>>>>> add loader
+
+logger = logging.getLogger(__name__)
+loader = ResourceLoader(__name__)
 
 
 @XBlock.needs("i18n")
