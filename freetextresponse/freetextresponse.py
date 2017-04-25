@@ -17,8 +17,12 @@ from xblock.fields import String
 from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import StudioEditableXBlockMixin
+from xblockutils.resources import ResourceLoader
 
 from .utils import _
+
+logger = logging.getLogger(__name__)
+loader = ResourceLoader(__name__)
 
 
 class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
