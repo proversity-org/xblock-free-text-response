@@ -1,6 +1,14 @@
 """
 This is the core logic for the Free-text Response XBlock
 """
+<<<<<<< HEAD
+=======
+
+import os
+import logging
+import pkg_resources
+from django.utils.translation import ungettext
+>>>>>>> import logging
 from enum import Enum
 from django.db import IntegrityError
 from django.template.context import Context
