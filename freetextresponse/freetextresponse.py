@@ -261,8 +261,8 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
             field_info = self._make_field_info(field_name, field)
             if field_info is not None:
                 context["fields"].append(field_info)
-        frag.content = loader.render_django_template("static/html/studio_edit.html", context)
-        frag.add_javascript(loader.load_unicode("static/js/src/studio_edit.js"))
+        frag.content = loader.render_django_template("static/studio_edit.html", context)
+        frag.add_javascript(loader.load_unicode("static/studio_edit.js"))
         frag.initialize_js('StudioEditableXBlockMixin')
         return frag
 >>>>>>> include block id in studio view
