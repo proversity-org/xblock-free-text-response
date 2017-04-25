@@ -210,6 +210,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
     has_score = True
 
     editable_fields = (
+        'block_id',
         'display_name',
         'prompt',
         'weight',
