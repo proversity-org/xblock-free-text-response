@@ -3,7 +3,7 @@ This is the core logic for the Free-text Response XBlock
 """
 
 import os
-
+import logging
 import pkg_resources
 from django.utils.translation import ungettext
 from enum import Enum
