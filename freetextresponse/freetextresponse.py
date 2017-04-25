@@ -75,6 +75,11 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         ]
         return scenarios
 
+    block_id = String(
+        display_name=_('ID'),
+        help=_('The ID of the Free Text Response XBlock'),
+        scope=Scope.settings,
+    )
     display_correctness = Boolean(
         display_name=_('Display Correctness?'),
         help=_(
@@ -212,6 +217,28 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         'halfcredit_keyphrases',
         'submitted_message',
     )
+
+    def studio_view(self, context):
+        """
+        Render a form for editing this XBlock
+        """
+        frag = Fragment()
+        context = {'block_id': self.scope_ids.usage_id._to_string()}
+        # Build a list of all the fields that can be edited:
+        for field_name in self.editable_fields:
+            field = self.fields[field_name]
+            assert field.scope in (Scope.content, Scope.settings), (
+                "Only Scope.content or Scope.settings fields can be used with "
+                "StudioEditableXBlockMixin. Other scopes are for user-specific data and are "
+                "not generally created/configured by content authors in Studio."
+            )
+            field_info = self._make_field_info(field_name, field)
+            if field_info is not None:
+                context["fields"].append(field_info)
+        frag.content = loader.render_django_template("static/html/recap_edit.html", context)
+        frag.add_javascript(loader.load_unicode("static/js/src/recap_edit.js"))
+        frag.initialize_js('StudioEditableXBlockMixin')
+        return frag
 
     # Decorate the view in order to support multiple devices e.g. mobile
     # See: https://openedx.atlassian.net/wiki/display/MA/Course+Blocks+API
