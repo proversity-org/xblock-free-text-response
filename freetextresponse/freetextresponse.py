@@ -230,10 +230,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         idArray = self.scope_ids.usage_id._to_string().split('@')
         xblockId = idArray[len(idArray) -1]
         frag = Fragment()
-        context = {
-            'fields': [],
-            'block_id': xblockId
-        }
+        context = { 'fields': [] }
         # Build a list of all the fields that can be edited:
         for field_name in self.editable_fields:
             field = self.fields[field_name]
@@ -244,6 +241,10 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
             )
             field_info = self._make_field_info(field_name, field)
             if field_info is not None:
+                if (field_name == 'block_id') {
+                    print 'i am in the if'
+                    field_info['value'] = xblockId
+                }
                 context["fields"].append(field_info)
         frag.content = loader.render_django_template("static/studio_edit.html", context)
         frag.add_javascript(loader.load_unicode("static/studio_edit.js"))
