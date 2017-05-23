@@ -102,6 +102,12 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         default=_('Free-text Response'),
         scope=Scope.settings,
     )
+    display_word_count = String(
+        display_name=_('Word count message'),
+        help=_('Word count instruction message. Make sure the number is the same as the Maximum word Count.'),
+        default='',
+        scope=Scope.settings,
+    )
     fullcredit_keyphrases = List(
         display_name=_('Full-Credit Key Phrases'),
         help=_(
@@ -212,6 +218,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
     editable_fields = (
         'block_id',
         'display_name',
+        'display_word_count',
         'prompt',
         'weight',
         'max_attempts',
@@ -262,7 +269,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         view_html = FreeTextResponse.get_resource_string('view.html')
         view_html = view_html.format(
             self=self,
-            word_count_message=self._get_word_count_message(),
+            word_count_message=self.display_word_count,
             indicator_class=self._get_indicator_class(),
             problem_progress=self._get_problem_progress(),
             used_attempts_feedback=self._get_used_attempts_feedback(),
