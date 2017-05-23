@@ -104,7 +104,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
     )
     display_word_count = String(
         display_name='Word count message',
-        help=('Word count instruction message'),
+        help=('Word count instruction message. Make sure the number is the same as the Maximum word Count.'),
         default='',
         scope=Scope.settings,
     )
