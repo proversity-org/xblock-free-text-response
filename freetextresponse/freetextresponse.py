@@ -104,10 +104,10 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
     )
     display_word_count = String(
         display_name='Word count message',
-        help=('This is the prompt students will see for '
-            'the maximum number of words allowed'),
+        help=('Word count instruction message'),
+        default='',
         scope=Scope.settings,
-        )
+    )
     fullcredit_keyphrases = List(
         display_name=_('Full-Credit Key Phrases'),
         help=_(
