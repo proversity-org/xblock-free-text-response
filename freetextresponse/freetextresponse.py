@@ -116,6 +116,12 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
         default='Free-text Response',
         scope=Scope.settings,
     )
+    display_word_count = String(
+        display_name=_('Word count message'),
+        help=_('Word count instruction message. Make sure the number is the same as the Maximum word Count.'),
+        default='',
+        scope=Scope.settings,
+    )
     fullcredit_keyphrases = List(
         display_name=_('Full-Credit Key Phrases'),
         help=_(
@@ -226,6 +232,7 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
     editable_fields = (
         'block_id',
         'display_name',
+        'display_word_count',
         'prompt',
         'weight',
         'max_attempts',
@@ -307,6 +314,7 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
             (Fragment): The HTML Fragment for this XBlock, which determines the
             general frame of the FreeTextResponse Question.
         """
+<<<<<<< HEAD
 
         self.runtime.service(self, 'i18n')
         context.update(
@@ -322,6 +330,21 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
                 'visibility_class': self._get_indicator_visibility_class(),
                 'word_count_message': self._get_word_count_message(),
             }
+=======
+        Build the fragment for the default student view
+        """
+        view_html = FreeTextResponse.get_resource_string('view.html')
+        view_html = view_html.format(
+            self=self,
+            word_count_message=self.display_word_count,
+            indicator_class=self._get_indicator_class(),
+            problem_progress=self._get_problem_progress(),
+            used_attempts_feedback=self._get_used_attempts_feedback(),
+            nodisplay_class=self._get_nodisplay_class(),
+            visibility_class=self._get_indicator_visibility_class(),
+            submitted_message='',
+            user_alert='',
+>>>>>>> Freetextresponse/add editable word count field studio (#3)
         )
         template = get_template('freetextresponse_view.html')
         fragment = self.build_fragment(
