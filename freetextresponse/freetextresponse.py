@@ -227,6 +227,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
     editable_fields = (
         'block_id',
         'display_name',
+        'display_save_button',
         'display_word_count',
         'prompt',
         'weight',
