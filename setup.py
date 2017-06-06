@@ -27,7 +27,7 @@ class Tox(TestCommand):
 
 setup(
     name="xblock-free-text-response",
-    version="0.1.2",
+    version="0.1.3",
     description="Enables instructors to create questions with free-text responses.",
     license='AGPL-3.0',
     packages=[
@@ -57,6 +57,7 @@ setup(
     package_data={
         "freetextresponse": [
             'public/*',
+            'static/*'
         ],
     },
     classifiers=[

@@ -102,6 +102,15 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         default=_('Free-text Response'),
         scope=Scope.settings,
     )
+    display_save_button = Boolean(
+        display_name=_('Display save button'),
+        help=_(
+            'This is a flag that indicates if the save'
+            'button should be displayed alongside the submit button'
+        ),
+        default=True,
+        scope=Scope.settings,
+    )
     display_word_count = String(
         display_name=_('Word count message'),
         help=_('Word count instruction message. Make sure the number is the same as the Maximum word Count.'),
@@ -218,6 +227,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
     editable_fields = (
         'block_id',
         'display_name',
+        'display_save_button',
         'display_word_count',
         'prompt',
         'weight',
@@ -229,6 +239,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         'halfcredit_keyphrases',
         'submitted_message',
     )
+    show_in_read_only_mode = True
 
     def studio_view(self, context):
         """
@@ -274,6 +285,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
             problem_progress=self._get_problem_progress(),
             used_attempts_feedback=self._get_used_attempts_feedback(),
             nodisplay_class=self._get_nodisplay_class(),
+            get_save_button=self.get_save_button(),
             visibility_class=self._get_indicator_visibility_class(),
             submitted_message='',
             user_alert='',
@@ -289,6 +301,13 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
             fragment_js='FreeTextResponseView',
         )
         return fragment
+
+    def get_save_button(self):
+
+        if self.display_save_button == True:
+            return '<button class="save {nodisplay_class}" data-value="Save">Save</button>'
+        elif self.display_save_button == False:
+            return ''
 
     def max_score(self):
         """
