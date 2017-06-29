@@ -30,7 +30,7 @@ from xblockutils.studio_editable import StudioEditableXBlockMixin
 from .mixins import EnforceDueDates
 =======
 from xblockutils.resources import ResourceLoader
-
+from submissions import api as sub_api
 from .utils import _
 >>>>>>> add loader
 
@@ -257,6 +257,7 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
     show_in_read_only_mode = True
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     def build_fragment(
             self,
             template,
@@ -280,6 +281,20 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
         fragment.initialize_js(initialize_js_func)
         return fragment
 =======
+=======
+    def student_item_key(self):
+        '''Get the student_item_dict required for the submissions API'''
+
+        assert sub_api is not None
+        locations = self.location.replace(branch=None, version=None)
+        return dict(
+            student_id=self.runtime.anonymous_student_id,
+            course_id=unicode(location.course_key),
+            item_id=unicode(location),
+            item_type=self.scope_ids.block_type,
+            )
+
+>>>>>>> try create a submission when submitting
     def studio_view(self, context):
         """
         Render a form for editing this XBlock
@@ -654,6 +669,11 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
         # down on the previous sumbisson
         if self._can_submit():
             self.student_answer = data['student_answer']
+
+            submission = self.student_answer
+            if sub_api:
+                sub_api.create_submission(self.student_item_dict, submission)
+                print "I SUBMITTED"
             # Counting the attempts and publishing a score
             # even if word count is invalid.
             self.count_attempts += 1
