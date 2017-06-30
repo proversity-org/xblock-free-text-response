@@ -256,7 +256,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
             item_id=unicode(location),
             item_type=self.scope_ids.block_type,
         )
-        
+
     def studio_view(self, context):
         """
         Render a form for editing this XBlock
@@ -637,7 +637,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
 
             submission = self.student_answer
             if sub_api:
-                sub_api.create_submission(self.student_item_key, submission)
+                sub_api.create_submission(self.student_item_key(), submission)
                 print "I SUBMITTED"
             # Counting the attempts and publishing a score
             # even if word count is invalid.
