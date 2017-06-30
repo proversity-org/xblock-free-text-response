@@ -18,11 +18,16 @@ from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import StudioEditableXBlockMixin
 from xblockutils.resources import ResourceLoader
-from submissions import api as sub_api
 from .utils import _
+
+try:
+    from submissions import api as sub_api
+except ImportError:
+    sub_api = None 
 
 logger = logging.getLogger(__name__)
 loader = ResourceLoader(__name__)
+
 
 
 class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
@@ -242,17 +247,16 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
     show_in_read_only_mode = True
 
     def student_item_key(self):
-        '''Get the student_item_dict required for the submissions API'''
-
+        """ Get the student_item_dict required for the submissions API """
         assert sub_api is not None
-        locations = self.location.replace(branch=None, version=None)
+        location = self.location.replace(branch=None, version=None)  # Standardize the key in case it isn't already
         return dict(
             student_id=self.runtime.anonymous_student_id,
             course_id=unicode(location.course_key),
             item_id=unicode(location),
             item_type=self.scope_ids.block_type,
-            )
-
+        )
+        
     def studio_view(self, context):
         """
         Render a form for editing this XBlock
@@ -633,7 +637,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
 
             submission = self.student_answer
             if sub_api:
-                sub_api.create_submission(self.student_item_dict, submission)
+                sub_api.create_submission(self.student_item_key, submission)
                 print "I SUBMITTED"
             # Counting the attempts and publishing a score
             # even if word count is invalid.
