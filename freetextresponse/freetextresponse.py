@@ -306,8 +306,12 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
 >>>>>>> try create a submission when submitting
 =======
         )
+<<<<<<< HEAD
         
 >>>>>>> try again, create submission
+=======
+
+>>>>>>> call function
     def studio_view(self, context):
         """
         Render a form for editing this XBlock
@@ -685,7 +689,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
 
             submission = self.student_answer
             if sub_api:
-                sub_api.create_submission(self.student_item_key, submission)
+                sub_api.create_submission(self.student_item_key(), submission)
                 print "I SUBMITTED"
             # Counting the attempts and publishing a score
             # even if word count is invalid.
