@@ -9,10 +9,13 @@ import logging
 import pkg_resources
 from django.utils.translation import ungettext
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> import logging
 =======
 from django.contrib.auth.models import User
 >>>>>>> fix student item key to use user.id
+=======
+>>>>>>> simplify code
 from enum import Enum
 from django.db import IntegrityError
 from django.template.context import Context
@@ -299,11 +302,9 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         """ Get the student_item_dict required for the submissions API """
         assert sub_api is not None
         user =  self.runtime.get_real_user(self.runtime.anonymous_student_id)
-        current_user = User.objects.get(username=user)
-        current_user_id = current_user.id
         location = self.location.replace(branch=None, version=None)  # Standardize the key in case it isn't already
         return dict(
-            student_id=current_user_id,
+            student_id=user.id,
             course_id=unicode(location.course_key),
             item_id=unicode(location),
             item_type=self.scope_ids.block_type,
