@@ -28,10 +28,14 @@ class Tox(TestCommand):
 setup(
     name="xblock-free-text-response",
 <<<<<<< HEAD
+<<<<<<< HEAD
     version="0.1.9",
 =======
     version="0.1.3",
 >>>>>>> Proversity/add save button conditional (#6)
+=======
+    version="0.1.4",
+>>>>>>> update version number and tag
     description="Enables instructors to create questions with free-text responses.",
     license='AGPL-3.0',
     packages=[
