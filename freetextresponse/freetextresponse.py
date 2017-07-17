@@ -637,7 +637,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         if self.max_attempts == 0 or self.count_attempts < self.max_attempts:
             self.student_answer = data['student_answer']
 
-            # Create a submissions api
+            # Create a submission using the submissions api
             submission = self.student_answer
             if sub_api:
                 sub_api.create_submission(self.student_item_key(), submission)
