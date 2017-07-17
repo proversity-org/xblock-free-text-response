@@ -8,7 +8,11 @@ import os
 import logging
 import pkg_resources
 from django.utils.translation import ungettext
+<<<<<<< HEAD
 >>>>>>> import logging
+=======
+from django.contrib.auth.models import User
+>>>>>>> fix student item key to use user.id
 from enum import Enum
 from django.db import IntegrityError
 from django.template.context import Context
@@ -294,9 +298,12 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
     def student_item_key(self):
         """ Get the student_item_dict required for the submissions API """
         assert sub_api is not None
+        user =  self.runtime.get_real_user(self.runtime.anonymous_student_id)
+        current_user = User.objects.get(username=user)
+        current_user_id = current_user.id
         location = self.location.replace(branch=None, version=None)  # Standardize the key in case it isn't already
         return dict(
-            student_id=self.runtime.anonymous_student_id,
+            student_id=current_user_id,
             course_id=unicode(location.course_key),
             item_id=unicode(location),
             item_type=self.scope_ids.block_type,
@@ -311,7 +318,11 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
 >>>>>>> try again, create submission
 =======
 
+<<<<<<< HEAD
 >>>>>>> call function
+=======
+
+>>>>>>> fix student item key to use user.id
     def studio_view(self, context):
         """
         Render a form for editing this XBlock
@@ -687,10 +698,10 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         if self._can_submit():
             self.student_answer = data['student_answer']
 
+            # Create a submissions api
             submission = self.student_answer
             if sub_api:
                 sub_api.create_submission(self.student_item_key(), submission)
-                print "I SUBMITTED"
             # Counting the attempts and publishing a score
             # even if word count is invalid.
             self.count_attempts += 1
