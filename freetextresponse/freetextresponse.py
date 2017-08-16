@@ -248,15 +248,20 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
 
     def student_item_key(self):
         """ Get the student_item_dict required for the submissions API """
-        assert sub_api is not None
-        user =  self.runtime.get_real_user(self.runtime.anonymous_student_id)
-        location = self.location.replace(branch=None, version=None)  # Standardize the key in case it isn't already
-        return dict(
-            student_id=user.id,
-            course_id=unicode(location.course_key),
-            item_id=unicode(location),
-            item_type=self.scope_ids.block_type,
-        )
+        try:
+            user =  self.runtime.get_real_user(self.runtime.anonymous_student_id)
+            location = self.location.replace(branch=None, version=None)  # Standardize the key in case it isn't already
+            student_item = dict(
+                student_id=user.id,
+                course_id=unicode(location.course_key),
+                item_id=unicode(location),
+                item_type=self.scope_ids.block_type,
+            )
+        except AttributeError:
+            logger.error('If you are using Studio, you do not have access to self.runtime.get_real_user')
+            student_item = None
+        return student_item
+
 
 
     def studio_view(self, context):
