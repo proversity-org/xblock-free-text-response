@@ -701,7 +701,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
 
             # Create a submission using the submissions api
             submission = self.student_answer
-            if sub_api:
+            if sub_api and self.runtime.get_real_user:
                 sub_api.create_submission(self.student_item_key(), submission)
             # Counting the attempts and publishing a score
             # even if word count is invalid.
