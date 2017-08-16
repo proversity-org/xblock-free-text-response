@@ -29,6 +29,7 @@ setup(
     name="xblock-free-text-response",
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     version="0.1.9",
 =======
     version="0.1.3",
@@ -36,6 +37,9 @@ setup(
 =======
     version="0.1.4",
 >>>>>>> update version number and tag
+=======
+    version="0.2.0",
+>>>>>>> version jump
     description="Enables instructors to create questions with free-text responses.",
     license='AGPL-3.0',
     packages=[
