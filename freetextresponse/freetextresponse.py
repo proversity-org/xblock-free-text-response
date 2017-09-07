@@ -18,11 +18,16 @@ from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import StudioEditableXBlockMixin
 from xblockutils.resources import ResourceLoader
-
 from .utils import _
+
+try:
+    from submissions import api as sub_api
+except ImportError:
+    sub_api = None 
 
 logger = logging.getLogger(__name__)
 loader = ResourceLoader(__name__)
+
 
 
 class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
@@ -240,6 +245,24 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         'submitted_message',
     )
     show_in_read_only_mode = True
+
+    def student_item_key(self):
+        """ Get the student_item_dict required for the submissions API """
+        try:
+            user =  self.runtime.get_real_user(self.runtime.anonymous_student_id)
+            location = self.location.replace(branch=None, version=None)  # Standardize the key in case it isn't already
+            student_item = dict(
+                student_id=user.id,
+                course_id=unicode(location.course_key),
+                item_id=unicode(location),
+                item_type=self.scope_ids.block_type,
+            )
+        except AttributeError:
+            logger.error('If you are using Studio, you do not have access to self.runtime.get_real_user')
+            student_item = None
+        return student_item
+
+
 
     def studio_view(self, context):
         """
@@ -618,6 +641,11 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         # down on the previous sumbisson
         if self.max_attempts == 0 or self.count_attempts < self.max_attempts:
             self.student_answer = data['student_answer']
+
+            # Create a submission using the submissions api
+            submission = self.student_answer
+            if sub_api and self.runtime.get_real_user:
+                sub_api.create_submission(self.student_item_key(), submission)
             # Counting the attempts and publishing a score
             # even if word count is invalid.
             self.count_attempts += 1
