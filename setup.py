@@ -56,6 +56,7 @@ setup(
     },
     package_data={
         "freetextresponse": [
+            'public/images/*',
             'public/*',
             'static/*'
         ],
