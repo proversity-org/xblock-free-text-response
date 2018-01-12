@@ -1,7 +1,11 @@
-function FreeTextResponseView(runtime, element) {
+function FreeTextResponseView(runtime, element, data) {
     'use strict';
 
     var $ = window.jQuery;
+    var xblockId = data.freetextBlockId;
+    if (localStorage.getItem("student_answer_saved" + "_" + xblockId) != null) {
+        $("#" + xblockId).html(localStorage.getItem("student_answer_saved" + "_" + xblockId));
+    }
     var $element = $(element);
     var $xblocksContainer = $('#seq_content');
     var buttonSubmit = $element.find('.check.Submit');
@@ -44,6 +48,7 @@ function FreeTextResponseView(runtime, element) {
             message: 'Submitting...',
             state: 'start'
         });
+        localStorage.removeItem("student_answer_saved" + "_" + xblockId);
         $.ajax(url, {
             type: 'POST',
             data: JSON.stringify({
@@ -80,6 +85,8 @@ function FreeTextResponseView(runtime, element) {
             message: 'Saving...',
             state: 'start'
         });
+        var student_answer_saved = $("#" + xblockId).val();
+        localStorage.setItem("student_answer_saved" + "_" + xblockId, student_answer_saved);
         $.ajax(urlSave, {
             type: 'POST',
             data: JSON.stringify({
