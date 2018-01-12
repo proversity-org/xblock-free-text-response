@@ -246,6 +246,12 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
     )
     show_in_read_only_mode = True
 
+    def _get_xblock_id(self):
+        idArray = self.scope_ids.usage_id._to_string().split('@')
+        xblockId = idArray[len(idArray) -1]
+
+        return xblockId
+
     def student_item_key(self):
         """ Get the student_item_dict required for the submissions API """
         try:
@@ -268,8 +274,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         """
         Render a form for editing this XBlock
         """
-        idArray = self.scope_ids.usage_id._to_string().split('@')
-        xblockId = idArray[len(idArray) -1]
+        xblockId = self._get_xblock_id()
         frag = Fragment()
         context = { 'fields': [] }
         # Build a list of all the fields that can be edited:
@@ -300,9 +305,11 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         """
         Build the fragment for the default student view
         """
+        xblock_id = self._get_xblock_id()
         view_html = FreeTextResponse.get_resource_string('view.html')
         view_html = view_html.format(
             self=self,
+            xblock_id=xblock_id,
             word_count_message=self.display_word_count,
             indicator_class=self._get_indicator_class(),
             problem_progress=self._get_problem_progress(),
@@ -413,7 +420,9 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         #  pylint: disable=dangerous-default-value, too-many-arguments
         """
         Assemble the HTML, JS, and CSS for an XBlock fragment
+
         """
+        xblockId = self._get_xblock_id()
         fragment = Fragment(html_source)
         for url in urls_css:
             fragment.add_css_url(url)
@@ -426,7 +435,9 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
             url = self.get_resource_url(path)
             fragment.add_javascript_url(url)
         if fragment_js:
-            fragment.initialize_js(fragment_js)
+            fragment.initialize_js(fragment_js, {
+                'freetextBlockId': xblockId,
+                })
         return fragment
 
     def _get_indicator_visibility_class(self):
