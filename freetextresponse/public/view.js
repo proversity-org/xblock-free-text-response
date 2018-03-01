@@ -20,7 +20,6 @@ function FreeTextResponseView(runtime, element, data) {
     var url = runtime.handlerUrl(element, 'submit');
     var urlSave = runtime.handlerUrl(element, 'save_reponse');
 
-    var xblockId = $element.attr('data-usage-id');
     var cachedAnswerId = xblockId + '_cached_answer';
     var problemProgressId = xblockId + '_problem_progress';
     var usedAttemptsFeedbackId = xblockId + '_used_attempts_feedback';

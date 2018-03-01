@@ -1,21 +1,12 @@
+# -*- coding: utf-8 -*-
 """
 This is the core logic for the Free-text Response XBlock
 """
-<<<<<<< HEAD
-=======
 
 import os
 import logging
 import pkg_resources
-from django.utils.translation import ungettext
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> import logging
-=======
 from django.contrib.auth.models import User
->>>>>>> fix student item key to use user.id
-=======
->>>>>>> simplify code
 from enum import Enum
 from django.db import IntegrityError
 from django.template.context import Context
@@ -33,29 +24,21 @@ from xblock.fields import String
 from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
 from xblockutils.studio_editable import StudioEditableXBlockMixin
-<<<<<<< HEAD
 from .mixins import EnforceDueDates
-=======
 from xblockutils.resources import ResourceLoader
-from .utils import _
->>>>>>> add loader
+
 
 try:
     from submissions import api as sub_api
 except ImportError:
     sub_api = None 
 
-logger = logging.getLogger(__name__)
 loader = ResourceLoader(__name__)
+logger = logging.getLogger(__name__)
 
 
-<<<<<<< HEAD
 @XBlock.needs("i18n")
 class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
-=======
-
-class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
->>>>>>> try again, create submission
     #  pylint: disable=too-many-ancestors, too-many-instance-attributes
     """
     Enables instructors to create questions with free-text responses.
@@ -272,63 +255,64 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
     )
     show_in_read_only_mode = True
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
+
     def build_fragment(
             self,
-            template,
-            context_dict,
-            initialize_js_func,
-            additional_css=[],
-            additional_js=[],
+            html_source=None,
+            paths_css=[],
+            paths_js=[],
+            urls_css=[],
+            urls_js=[],
+            fragment_js=None,
     ):
         #  pylint: disable=dangerous-default-value, too-many-arguments
         """
-        Creates a fragment for display.
+        Assemble the HTML, JS, and CSS for an XBlock fragment
         """
-        context = Context(context_dict)
-        fragment = Fragment(template.render(context))
-        for item in additional_css:
-            url = self.runtime.local_resource_url(self, item)
+        xblockId = self._get_xblock_id()
+        fragment = Fragment(unicode(html_source, 'utf-8'))
+        for url in urls_css:
             fragment.add_css_url(url)
-        for item in additional_js:
-            url = self.runtime.local_resource_url(self, item)
+        for path in paths_css:
+            url = self.get_resource_url(path)
+            fragment.add_css_url(url)
+        for url in urls_js:
             fragment.add_javascript_url(url)
-        fragment.initialize_js(initialize_js_func)
+        for path in paths_js:
+            url = self.get_resource_url(path)
+            fragment.add_javascript_url(url)
+        if fragment_js:
+            fragment.initialize_js(fragment_js, {
+                'freetextBlockId': xblockId,
+                })
         return fragment
-=======
-=======
-=======
+
     def _get_xblock_id(self):
         idArray = self.scope_ids.usage_id._to_string().split('@')
         xblockId = idArray[len(idArray) -1]
 
         return xblockId
 
->>>>>>> Proversity/fix save button with local storage (#14)
+    def get_resource_url(self, path):
+        """
+        Retrieve a public URL for the file path
+        """
+        path = os.path.join('public', path)
+        resource_url = self.runtime.local_resource_url(self, path)
+        return resource_url
+
+    @classmethod
+    def get_resource_string(cls, path):
+        """
+        Retrieve string contents for the file path
+        """
+        path = os.path.join('templates', path)
+        resource_string = pkg_resources.resource_string(__name__, path)
+        return resource_string
+
+
     def student_item_key(self):
         """ Get the student_item_dict required for the submissions API """
-<<<<<<< HEAD
-        assert sub_api is not None
-        user =  self.runtime.get_real_user(self.runtime.anonymous_student_id)
-        location = self.location.replace(branch=None, version=None)  # Standardize the key in case it isn't already
-        return dict(
-            student_id=user.id,
-            course_id=unicode(location.course_key),
-            item_id=unicode(location),
-            item_type=self.scope_ids.block_type,
-<<<<<<< HEAD
-            )
-
->>>>>>> try create a submission when submitting
-=======
-        )
-<<<<<<< HEAD
-        
->>>>>>> try again, create submission
-=======
-=======
         try:
             user =  self.runtime.get_real_user(self.runtime.anonymous_student_id)
             location = self.location.replace(branch=None, version=None)  # Standardize the key in case it isn't already
@@ -343,13 +327,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
             student_item = None
         return student_item
 
->>>>>>> add some exception handling for studio errors
 
-<<<<<<< HEAD
->>>>>>> call function
-=======
-
->>>>>>> fix student item key to use user.id
     def studio_view(self, context):
         """
         Render a form for editing this XBlock
@@ -375,7 +353,6 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         frag.add_javascript(loader.load_unicode("static/studio_edit.js"))
         frag.initialize_js('StudioEditableXBlockMixin')
         return frag
->>>>>>> include block id in studio view
 
     # Decorate the view in order to support multiple devices e.g. mobile
     # See: https://openedx.atlassian.net/wiki/display/MA/Course+Blocks+API
@@ -394,62 +371,50 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
             (Fragment): The HTML Fragment for this XBlock, which determines the
             general frame of the FreeTextResponse Question.
         """
-<<<<<<< HEAD
-
-        self.runtime.service(self, 'i18n')
-        context.update(
-            {
-                'display_name': self.display_name,
-                'indicator_class': self._get_indicator_class(),
-                'nodisplay_class': self._get_nodisplay_class(),
-                'problem_progress': self._get_problem_progress(),
-                'prompt': self.prompt,
-                'student_answer': self.student_answer,
-                'is_past_due': self.is_past_due(),
-                'used_attempts_feedback': self._get_used_attempts_feedback(),
-                'visibility_class': self._get_indicator_visibility_class(),
-                'word_count_message': self._get_word_count_message(),
-            }
-=======
-        Build the fragment for the default student view
-        """
         xblock_id = self._get_xblock_id()
-        view_html = FreeTextResponse.get_resource_string('view.html')
+        self.runtime.service(self, 'i18n')
+        view_html = FreeTextResponse.get_resource_string('freetextresponse_view.html')
         view_html = view_html.format(
             self=self,
+            display_name=self.display_name.encode("utf-8"),
             xblock_id=xblock_id,
-            word_count_message=self.display_word_count,
+            prompt=self.prompt.encode("utf-8"),
+            student_answer=self.student_answer.encode("utf-8"),
+            word_count_message=self._get_word_count_message(),
             indicator_class=self._get_indicator_class(),
             problem_progress=self._get_problem_progress(),
             used_attempts_feedback=self._get_used_attempts_feedback(),
             nodisplay_class=self._get_nodisplay_class(),
+            get_submit_button=self.get_submit_button(),
             get_save_button=self.get_save_button(),
+            is_past_due=self.is_past_due(),
             visibility_class=self._get_indicator_visibility_class(),
             submitted_message='',
             user_alert='',
->>>>>>> Freetextresponse/add editable word count field studio (#3)
         )
-        template = get_template('freetextresponse_view.html')
         fragment = self.build_fragment(
-            template,
-            context,
-            initialize_js_func='FreeTextResponseView',
-            additional_css=[
-                'public/view.less.min.css',
+            html_source=view_html,
+            paths_css=[
+                'view.less.min.css',
             ],
-            additional_js=[
-                'public/view.js.min.js',
+            paths_js=[
+                'view.js.min.js',
             ],
+            fragment_js='FreeTextResponseView',
         )
         return fragment
 
     def get_save_button(self):
 
         if self.display_save_button == True:
-            return '<button class="save {nodisplay_class}" data-value="Save">Save</button>'
+            return '<button class="save {{ nodisplay_class }}" data-checking="{data_checking}" data-value={data_value}>{save}</button>'.format(data_checking=_('Checking...'), data_value=_('Save'), save=_('Save'))
         elif self.display_save_button == False:
             return ''
 
+    def get_submit_button(self):
+
+        return '<button class="check Submit {{ nodisplay_class }}" data-checking="{data_checking}" data-value={data_value}>{submit}</button>'.format(data_checking=_('Checking...'), data_value=_('Submit'), submit=_('Submit'))
+            
     def max_score(self):
         """
         Returns the configured number of possible points for this component.
@@ -468,7 +433,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         """
         result = ValidationMessage(
             ValidationMessage.ERROR,
-            ugettext(unicode(msg))
+            _(unicode(msg))
         )
         return result
 
@@ -502,58 +467,7 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
             )
             validation.add(msg)
 
-<<<<<<< HEAD
-=======
-    @classmethod
-    def get_resource_string(cls, path):
-        """
-        Retrieve string contents for the file path
-        """
-        path = os.path.join('public', path)
-        resource_string = pkg_resources.resource_string(__name__, path)
-        return resource_string.decode('utf8')
 
-    def get_resource_url(self, path):
-        """
-        Retrieve a public URL for the file path
-        """
-        path = os.path.join('public', path)
-        resource_url = self.runtime.local_resource_url(self, path)
-        return resource_url
-
-    def build_fragment(
-            self,
-            html_source=None,
-            paths_css=[],
-            paths_js=[],
-            urls_css=[],
-            urls_js=[],
-            fragment_js=None,
-    ):
-        #  pylint: disable=dangerous-default-value, too-many-arguments
-        """
-        Assemble the HTML, JS, and CSS for an XBlock fragment
-
-        """
-        xblockId = self._get_xblock_id()
-        fragment = Fragment(html_source)
-        for url in urls_css:
-            fragment.add_css_url(url)
-        for path in paths_css:
-            url = self.get_resource_url(path)
-            fragment.add_css_url(url)
-        for url in urls_js:
-            fragment.add_javascript_url(url)
-        for path in paths_js:
-            url = self.get_resource_url(path)
-            fragment.add_javascript_url(url)
-        if fragment_js:
-            fragment.initialize_js(fragment_js, {
-                'freetextBlockId': xblockId,
-                })
-        return fragment
-
->>>>>>> Proversity/fix save button with local storage (#14)
     def _get_indicator_visibility_class(self):
         """
         Returns the visibility class for the correctness indicator html element
@@ -568,17 +482,18 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
         """
         Returns the word count message
         """
-        result = ungettext(
-            "Your response must be "
-            "between {min} and {max} word.",
-            "Your response must be "
-            "between {min} and {max} words.",
-            self.max_word_count,
-        ).format(
-            min=self.min_word_count,
-            max=self.max_word_count,
-        )
-        return result
+        if self.display_word_count != '' and None is not self.display_word_count:
+            result = self.display_word_count
+        else:
+            result = ungettext(
+                "Your response must be between {min} and {max} word.",
+                "Your response must be between {min} and {max} words.",
+                self.max_word_count,
+            ).format(
+                min=self.min_word_count,
+                max=self.max_word_count,
+            )
+        return result.encode("utf-8")
 
     def _get_invalid_word_count_message(self, ignore_attempts=False):
         """
@@ -590,12 +505,12 @@ class FreeTextResponse(StudioEditableXBlockMixin, XBlock):
                 (not self._word_count_valid())
         ):
             word_count_message = self._get_word_count_message()
-            result = ugettext(
+            result = _(
                 "Invalid Word Count. {word_count_message}"
             ).format(
                 word_count_message=word_count_message,
             )
-        return result
+        return unicode(result)
 
     def _get_indicator_class(self):
         """
