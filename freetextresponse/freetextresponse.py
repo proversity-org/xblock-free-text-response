@@ -433,7 +433,7 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
         """
         result = ValidationMessage(
             ValidationMessage.ERROR,
-            _(unicode(msg))
+            unicode(_(msg))
         )
         return result
 
