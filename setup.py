@@ -25,9 +25,10 @@ class Tox(TestCommand):
         errno = tox.cmdline(args=args)
         sys.exit(errno)
 
+
 setup(
     name="xblock-free-text-response",
-    version="0.2.3",
+    version="0.2.4",
     description="Enables instructors to create questions with free-text responses.",
     license='AGPL-3.0',
     packages=[
