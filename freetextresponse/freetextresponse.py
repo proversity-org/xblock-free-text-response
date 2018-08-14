@@ -403,14 +403,28 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
 
     def get_save_button(self):
 
+        base_context = {
+            "nodisplay_class": self._get_nodisplay_class(),
+            "data_checking": _('Checking...'),
+            "data_value": _('Save'),
+            "save": _('Save'),
+        }
+
         if self.display_save_button == True:
-            return '<button class="save {{ nodisplay_class }}" data-checking="{data_checking}" data-value={data_value}>{save}</button>'.format(data_checking=_('Checking...'), data_value=_('Save'), save=_('Save'))
+            return '<button class="save {nodisplay_class}" data-checking="{data_checking}" data-value={data_value}>{save}</button>'.format(**base_context)
         elif self.display_save_button == False:
             return ''
 
     def get_submit_button(self):
 
-        return '<button class="check Submit {{ nodisplay_class }}" data-checking="{data_checking}" data-value={data_value}>{submit}</button>'.format(data_checking=_('Checking...'), data_value=_('Submit'), submit=_('Submit'))
+        base_context = {
+            "nodisplay_class": self._get_nodisplay_class(),
+            "data_checking": _('Checking...'),
+            "data_value": _('Submit'),
+            "submit": _('Submit'),
+        }
+
+        return '<button class="check Submit {nodisplay_class}" data-checking="{data_checking}" data-value={data_value}>{submit}</button>'.format(**base_context)
 
     def max_score(self):
         """
