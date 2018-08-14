@@ -31,7 +31,7 @@ from xblockutils.resources import ResourceLoader
 try:
     from submissions import api as sub_api
 except ImportError:
-    sub_api = None 
+    sub_api = None
 
 loader = ResourceLoader(__name__)
 logger = logging.getLogger(__name__)
@@ -255,7 +255,6 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
     )
     show_in_read_only_mode = True
 
-
     def build_fragment(
             self,
             html_source=None,
@@ -284,12 +283,12 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
         if fragment_js:
             fragment.initialize_js(fragment_js, {
                 'freetextBlockId': xblockId,
-                })
+            })
         return fragment
 
     def _get_xblock_id(self):
         idArray = self.scope_ids.usage_id._to_string().split('@')
-        xblockId = idArray[len(idArray) -1]
+        xblockId = idArray[len(idArray) - 1]
 
         return xblockId
 
@@ -310,11 +309,10 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
         resource_string = pkg_resources.resource_string(__name__, path)
         return resource_string
 
-
     def student_item_key(self):
         """ Get the student_item_dict required for the submissions API """
         try:
-            user =  self.runtime.get_real_user(self.runtime.anonymous_student_id)
+            user = self.runtime.get_real_user(self.runtime.anonymous_student_id)
             location = self.location.replace(branch=None, version=None)  # Standardize the key in case it isn't already
             student_item = dict(
                 student_id=user.id,
@@ -327,14 +325,13 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
             student_item = None
         return student_item
 
-
     def studio_view(self, context):
         """
         Render a form for editing this XBlock
         """
         xblockId = self._get_xblock_id()
         frag = Fragment()
-        context = { 'fields': [] }
+        context = {'fields': []}
         # Build a list of all the fields that can be edited:
         for field_name in self.editable_fields:
             field = self.fields[field_name]
@@ -347,7 +344,7 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
             if field_info is not None:
                 if field_name == 'block_id':
                     field_info['value'] = xblockId
-                
+
                 context["fields"].append(field_info)
         frag.content = loader.render_django_template("static/studio_edit.html", context)
         frag.add_javascript(loader.load_unicode("static/studio_edit.js"))
@@ -414,7 +411,7 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
     def get_submit_button(self):
 
         return '<button class="check Submit {{ nodisplay_class }}" data-checking="{data_checking}" data-value={data_value}>{submit}</button>'.format(data_checking=_('Checking...'), data_value=_('Submit'), submit=_('Submit'))
-            
+
     def max_score(self):
         """
         Returns the configured number of possible points for this component.
@@ -424,6 +421,22 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
             float: The number of possible points for this component
         """
         return self.weight
+
+    def has_unlimited_attempts(self):
+        """
+        Returns True if the xblock has unlimited attempts (max_attempts set to 0 or None),
+        False otherwise
+        """
+        return not(bool(self.max_attempts))
+
+    def has_reached_max_attempts(self):
+        """
+        Returns True if the user has reached the configured max_attempts,
+        False otherwise
+        """
+        if self.has_unlimited_attempts():
+            return False
+        return self.count_attempts >= self.max_attempts
 
     @classmethod
     def _generate_validation_message(cls, msg):
@@ -446,7 +459,7 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
                 'Weight Attempts cannot be negative'
             )
             validation.add(msg)
-        if data.max_attempts < 0:
+        if data.max_attempts is not None and data.max_attempts < 0:
             msg = FreeTextResponse._generate_validation_message(
                 'Maximum Attempts cannot be negative'
             )
@@ -466,7 +479,6 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
                 'Submission Received Message cannot be blank'
             )
             validation.add(msg)
-
 
     def _get_indicator_visibility_class(self):
         """
@@ -634,7 +646,7 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
         they have used if applicable
         """
         result = ''
-        if self.max_attempts > 0:
+        if not self.has_unlimited_attempts():
             result = ungettext(
                 'You have used {count_attempts} of {max_attempts} submission',
                 'You have used {count_attempts} of {max_attempts} submissions',
@@ -650,7 +662,7 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
         Returns the css class for the submit button
         """
         result = ''
-        if self.max_attempts > 0 and self.count_attempts >= self.max_attempts:
+        if self.has_reached_max_attempts():
             result = 'nodisplay'
         return result
 
@@ -676,9 +688,7 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
     def _can_submit(self):
         if self.is_past_due():
             return False
-        if self.max_attempts == 0:
-            return True
-        if self.count_attempts < self.max_attempts:
+        if not self.has_reached_max_attempts():
             return True
         return False
 
@@ -723,7 +733,7 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
         """
         # Fails if the UI submit/save buttons were shut
         # down on the previous sumbisson
-        if self.max_attempts == 0 or self.count_attempts < self.max_attempts:
+        if not self.has_reached_max_attempts():
             self.student_answer = data['student_answer']
         result = {
             'status': 'success',
