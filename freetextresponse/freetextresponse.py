@@ -34,6 +34,7 @@ except ImportError:
 
 loader = ResourceLoader(__name__)
 logger = logging.getLogger(__name__)
+FIELD = 'student_answer'
 
 
 @XBlock.needs("i18n")
@@ -762,7 +763,7 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
     @staticmethod
     def custom_report_format(*args, **kwargs):
         """
-        This method return the summited answer for the give user and block.
+        This method returns the formated answer for the given user and block.
         """
         user = kwargs.get('user')
         block = kwargs.get('block')
@@ -771,11 +772,10 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
             student_item_dict = block.student_item_key(user=user)
             submission = sub_api.get_submissions(student_item_dict, limit=1)
             try:
-                return submission[0]['answer']
+                return submission[0].get('answer')
             except IndexError:
                 pass
 
-            field = 'student_answer'
             descriptor = modulestore().get_item(block.location, depth=1)
             field_data_cache = FieldDataCache.cache_for_descriptor_descendents(
                 block.location.course_key,
@@ -784,8 +784,9 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
                 asides=XBlockAsidesConfig.possible_asides(),
             )
             student_data = KvsFieldData(DjangoKeyValueStore(field_data_cache))
-            if student_data.has(block, field):
-                return student_data.get(block, field)
+
+            if student_data.has(block, FIELD):
+                return student_data.get(block, FIELD)
         return ''
 
 
