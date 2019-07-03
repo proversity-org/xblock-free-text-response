@@ -2,18 +2,15 @@
 """
 This is the core logic for the Free-text Response XBlock
 """
-
 import os
 import logging
 import pkg_resources
-from django.contrib.auth.models import User
 from enum import Enum
+from courseware.model_data import DjangoKeyValueStore, FieldDataCache
 from django.db import IntegrityError
-from django.template.context import Context
-from django.template.loader import get_template
 from django.utils.translation import ungettext
 from django.utils.translation import ugettext_lazy as _
-from django.utils.translation import ugettext
+from lms.djangoapps.lms_xblock.models import XBlockAsidesConfig
 from xblock.core import XBlock
 from xblock.fields import Boolean
 from xblock.fields import Float
@@ -22,11 +19,13 @@ from xblock.fields import List
 from xblock.fields import Scope
 from xblock.fields import String
 from xblock.fragment import Fragment
+from xblock.runtime import KvsFieldData
 from xblock.validation import ValidationMessage
-from xblockutils.studio_editable import StudioEditableXBlockMixin
-from .mixins import EnforceDueDates
 from xblockutils.resources import ResourceLoader
+from xblockutils.studio_editable import StudioEditableXBlockMixin
+from xmodule.modulestore.django import modulestore
 
+from .mixins import EnforceDueDates
 
 try:
     from submissions import api as sub_api
@@ -35,6 +34,7 @@ except ImportError:
 
 loader = ResourceLoader(__name__)
 logger = logging.getLogger(__name__)
+FIELD = 'student_answer'
 
 
 @XBlock.needs("i18n")
@@ -309,10 +309,11 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
         resource_string = pkg_resources.resource_string(__name__, path)
         return resource_string
 
-    def student_item_key(self):
+    def student_item_key(self, user=None):
         """ Get the student_item_dict required for the submissions API """
         try:
-            user = self.runtime.get_real_user(self.runtime.anonymous_student_id)
+            if not user:
+                user = self.runtime.get_real_user(self.runtime.anonymous_student_id)
             location = self.location.replace(branch=None, version=None)  # Standardize the key in case it isn't already
             student_item = dict(
                 student_id=user.id,
@@ -410,10 +411,9 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
             "save": _('Save'),
         }
 
-        if self.display_save_button == True:
+        if self.display_save_button:
             return '<button class="save {nodisplay_class}" data-checking="{data_checking}" data-value={data_value}>{save}</button>'.format(**base_context)
-        elif self.display_save_button == False:
-            return ''
+        return ''
 
     def get_submit_button(self):
 
@@ -759,6 +759,35 @@ class FreeTextResponse(EnforceDueDates, StudioEditableXBlockMixin, XBlock):
             'visibility_class': self._get_indicator_visibility_class(),
         }
         return result
+
+    @staticmethod
+    def custom_report_format(*args, **kwargs):
+        """
+        This method returns the formated answer for the given user and block.
+        """
+        user = kwargs.get('user')
+        block = kwargs.get('block')
+
+        if block and user:
+            student_item_dict = block.student_item_key(user=user)
+            submission = sub_api.get_submissions(student_item_dict, limit=1)
+            try:
+                return submission[0].get('answer')
+            except IndexError:
+                pass
+
+            descriptor = modulestore().get_item(block.location, depth=1)
+            field_data_cache = FieldDataCache.cache_for_descriptor_descendents(
+                block.location.course_key,
+                user,
+                descriptor,
+                asides=XBlockAsidesConfig.possible_asides(),
+            )
+            student_data = KvsFieldData(DjangoKeyValueStore(field_data_cache))
+
+            if student_data.has(block, FIELD):
+                return student_data.get(block, FIELD)
+        return ''
 
 
 class Credit(Enum):
